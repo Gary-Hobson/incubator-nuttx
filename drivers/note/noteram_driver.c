@@ -73,6 +73,8 @@ static int noteram_open(FAR struct file *filep);
 static ssize_t noteram_read(FAR struct file *filep,
                             FAR char *buffer, size_t buflen);
 static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg);
+static void ram_note_add(FAR struct note_channels_s *channel,
+                         FAR const void *note, size_t len);
 
 /****************************************************************************
  * Private Data
@@ -104,6 +106,11 @@ static struct noteram_info_s g_noteram_info =
 #if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
 static struct noteram_taskname_s g_noteram_taskname;
 #endif
+
+static struct note_channels_s g_ramnote_channels = {
+  .write       = ram_note_add,
+  .filter_flag = 0xff,
+};
 
 #ifdef CONFIG_SMP
 static volatile spinlock_t g_noteram_lock;
@@ -768,9 +775,6 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: sched_note_add
@@ -790,7 +794,7 @@ static int noteram_ioctl(struct file *filep, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-void sched_note_add(FAR const void *note, size_t notelen)
+static void sched_ramnote_add(FAR const void *note, size_t notelen)
 {
   FAR const char *buf = note;
   unsigned int head;
@@ -877,6 +881,16 @@ void sched_note_add(FAR const void *note, size_t notelen)
   up_irq_restore(flags);
 }
 
+static void ram_note_add(FAR struct note_channels_s *channel,
+                         FAR const void *note, size_t len)
+{
+  sched_ramnote_add(note, len);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
 /****************************************************************************
  * Name: noteram_register
  *
@@ -894,5 +908,6 @@ void sched_note_add(FAR const void *note, size_t notelen)
 
 int noteram_register(void)
 {
+  sched_note_channel_register(&g_ramnote_channels);
   return register_driver("/dev/note", &g_noteram_fops, 0666, NULL);
 }

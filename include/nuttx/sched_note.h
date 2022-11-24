@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 
+#include <nuttx/list.h>
 #include <nuttx/sched.h>
 
 /* For system call numbers definition */
@@ -138,6 +139,8 @@
 #  define SCHED_NOTE_BEGIN()
 #  define SCHED_NOTE_END()
 #endif
+
+#define NOTE_FILTER(type) (1 << (type))
 
 /****************************************************************************
  * Public Types
@@ -435,6 +438,16 @@ struct note_filter_irq_s
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
+struct note_channels_s
+{
+  int (*init)(struct note_channels_s *);
+  int (*uninit)(struct note_channels_s *);
+  void (*write)(FAR struct note_channels_s *, FAR const void *, size_t);
+  uint32_t filter_flag;
+  struct list_node node;
+  void *priv;
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -569,24 +582,36 @@ void sched_note_end(uintptr_t ip);
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
 /****************************************************************************
- * Name: sched_note_add
+ * Name: sched_note_channel_register
  *
  * Description:
- *   Add the variable length note to the transport layer
+ *   Add sched_note new channel
  *
  * Input Parameters:
- *   note    - The note buffer
- *   notelen - The buffer length
+ *   channel    - The channel
  *
  * Returned Value:
  *   None
  *
- * Assumptions:
- *   We are within a critical section.
+ ****************************************************************************/
+
+int sched_note_channel_register(FAR struct note_channels_s *channel);
+
+/****************************************************************************
+ * Name: sched_note_channel_register
+ *
+ * Description:
+ *   Remove sched_note channel
+ *
+ * Input Parameters:
+ *   channel    - The channel
+ *
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-void sched_note_add(FAR const void *note, size_t notelen);
+int sched_note_channel_unregister(FAR struct note_channels_s *channel);
 
 /****************************************************************************
  * Name: sched_note_filter_mode
@@ -664,6 +689,18 @@ void sched_note_filter_syscall(struct note_filter_syscall_s *oldf,
 void sched_note_filter_irq(struct note_filter_irq_s *oldf,
                            struct note_filter_irq_s *newf);
 #endif
+
+/****************************************************************************
+ * Name: sched_note_channel_unregister
+ ****************************************************************************/
+
+int sched_note_channel_unregister(FAR struct note_channels_s *channel);
+
+/****************************************************************************
+ * Name: sched_note_channel_register
+ ****************************************************************************/
+
+int sched_note_channel_register(FAR struct note_channels_s *channel);
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
 

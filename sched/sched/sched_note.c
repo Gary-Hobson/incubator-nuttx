@@ -91,6 +91,9 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 #endif
 #endif
 
+static struct list_node g_note_channel_list =
+    LIST_INITIAL_VALUE(g_note_channel_list);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -164,6 +167,43 @@ static void note_common(FAR struct tcb_s *tcb,
 
   sched_note_flatten(note->nc_systime, &systime, sizeof(systime));
 #endif
+}
+
+/****************************************************************************
+ * Name: sched_note_add
+ *
+ * Description:
+ *   Add the variable length note to the transport layer
+ *
+ * Input Parameters:
+ *   note    - The note buffer
+ *   notelen - The buffer length
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   We are within a critical section.
+ *
+ ****************************************************************************/
+
+static void sched_note_add(FAR const void *note, size_t notelen)
+{
+  FAR struct note_channels_s *channel;
+  FAR struct note_common_s *cmn = note;
+  list_for_every_entry(&g_note_channel_list, channel, struct note_channels_s,
+                       node)
+    {
+      if (!(g_note_filter.mode.flag & NOTE_FILTER(cmn->nc_type)))
+        {
+          continue;
+        }
+
+      if (channel->write)
+        {
+          channel->write(channel, note, notelen);
+        }
+    }
 }
 
 /****************************************************************************
@@ -1305,5 +1345,37 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
   leave_critical_section(irq_mask);
 }
 #endif
+
+/****************************************************************************
+ * Name: sched_note_channel_register
+ ****************************************************************************/
+
+int sched_note_channel_register(FAR struct note_channels_s *channel)
+{
+  DEBUGASSERT(channel);
+  list_add_tail(&g_note_channel_list, &channel->node);
+  if (channel->init)
+    {
+      return channel->init(channel);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: sched_note_channel_unregister
+ ****************************************************************************/
+
+int sched_note_channel_unregister(FAR struct note_channels_s *channel)
+{
+  DEBUGASSERT(channel);
+  if (channel->uninit)
+    {
+      channel->uninit(channel);
+    }
+
+  list_delete(&channel->node);
+  return 0;
+}
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
