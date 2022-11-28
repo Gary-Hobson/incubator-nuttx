@@ -94,6 +94,47 @@ config SYSLOG_RTT
 	---help---
 		Use Segger J-Link RTT as a SYSLOG output device.
 
+config SERIAL_RTT
+	bool "Segger RTT serial"
+	select SEGGER_RTT
+	select SERIAL_RXDMA
+	select SERIAL_TXDMA
+	default n
+	---help---
+		This option is used to enable RTT serial device
+		In Segger RTT serial driver, RTT channel buffer and serial DMA buffer are shared,
+		So you cannot use RTT stream to operate it
+
+config SERIAL_RTT_POLLING_INTERVAL
+	int "Segger RTT serial pilling interval (us)"
+	default 10000
+	---help---
+		This option is used to configure the RTT serial serial polling interval
+
+config CONSOLE_RTT
+	bool "Segger RTT console"
+	default n
+	select SERIAL_CONSOLE
+	select SERIAL_RTT
+	---help---
+		Enabling this option will use RTT as the end device, using RTT channel 0 by default.
+		The buffer size of RTT channel 0 is configured by SEGGER_RTT_BUFFER_SIZE_UP/DOWN
+		You need to turn off other console devices before using Segger RTT console
+
+if CONSOLE_RTT
+config CONSOLE_RTT_TXBUF_SIZE
+	int "RTT console tx buffer size"
+	default 256
+	---help---
+		Configure the RTT console tx buffer size
+
+config CONSOLE_RTT_RXBUF_SIZE
+	int "RTT console rx buffer size"
+	default 256
+	---help---
+		Configure the RTT console rx buffer size
+endif
+
 if SEGGER_SYSVIEW
 
 config SEGGER_SYSVIEW_RTT_CHANNEL

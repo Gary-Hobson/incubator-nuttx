@@ -98,6 +98,23 @@ ssize_t syslog_rtt_write(FAR struct syslog_channel_s *channel,
                          FAR const char *buffer, size_t buflen);
 #endif
 
+/****************************************************************************
+* Name: console_rtt_initialize
+*****************************************************************************/
+
+#ifdef CONFIG_CONSOLE_RTT
+void console_rtt_initialize(void);
+#endif
+
+/****************************************************************************
+* Name: serial_rtt_register
+*****************************************************************************/
+
+#ifdef CONFIG_SERIAL_RTT
+void serial_rtt_register(FAR const char *name, int channel, size_t txsize,
+                         size_t rxsize);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
