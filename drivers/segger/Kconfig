@@ -157,4 +157,7 @@ config SEGGER_SYSVIEW_RAM_BASE
 
 endif
 
+<<<<<<< HEAD
 endmenu # Segger RTT drivers
+=======
+>>>>>>> b87456cdeb... tmp

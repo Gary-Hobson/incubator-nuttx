@@ -194,7 +194,7 @@ static void sched_note_add(FAR const void *note, size_t notelen)
   list_for_every_entry(&g_note_channel_list, channel, struct note_channels_s,
                        node)
     {
-      if (!(g_note_filter.mode.flag & NOTE_FILTER(cmn->nc_type)))
+      if (!(channel->filter_flag & NOTE_FILTER(cmn->nc_type)))
         {
           continue;
         }

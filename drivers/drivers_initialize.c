@@ -72,6 +72,9 @@ void drivers_initialize(void)
   devrandom_register(); /* Standard /dev/random */
 #endif
 
+  console_rtt_initialize();
+  serial_rtt_register("/dev/rtt1", 1, 256, 256);
+
 #if defined(CONFIG_DEV_URANDOM)
   devurandom_register();   /* Standard /dev/urandom */
 #endif

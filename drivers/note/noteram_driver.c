@@ -109,7 +109,7 @@ static struct noteram_taskname_s g_noteram_taskname;
 
 static struct note_channels_s g_ramnote_channels = {
   .write       = ram_note_add,
-  .filter_flag = 0xff,
+  .filter_flag = 0x00,
 };
 
 #ifdef CONFIG_SMP
@@ -906,8 +906,10 @@ static void ram_note_add(FAR struct note_channels_s *channel,
  *
  ****************************************************************************/
 
+extern struct note_channels_s g_rtt_channels;
 int noteram_register(void)
 {
+  sched_note_channel_register(&g_rtt_channels);
   sched_note_channel_register(&g_ramnote_channels);
   return register_driver("/dev/note", &g_noteram_fops, 0666, NULL);
 }
