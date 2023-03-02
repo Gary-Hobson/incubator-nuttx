@@ -60,7 +60,7 @@ static void stdsostream_putc(FAR struct lib_sostream_s *this, int ch)
        * recoverable error.
        */
     }
-  while (get_errno() == EINTR);
+  while (_NX_GETERRNO() == EINTR);
 }
 
 /****************************************************************************
