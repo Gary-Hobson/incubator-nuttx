@@ -475,7 +475,7 @@ static inline int note_isenabled_dump(uint32_t tag)
   /* If the dump trace is disabled, do nothing. */
 
   if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_DUMP) ||
-      NOTE_FILTER_TAGMASK_ISSET(tag, &g_note_filter.tag_mask))
+      NOTE_FILTER_DUMPMASK_ISSET(tag, &g_note_filter.tag_mask))
     {
       return false;
     }
@@ -1884,7 +1884,7 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
  * Name: sched_note_filter_tag
  *
  * Description:
- *   Set and get tag filter setting
+ *   Set and get tsg filter setting
  *   (Same as NOTECTL_GETDUMPFILTER / NOTECTL_SETDUMPFILTER ioctls)
  *
  * Input Parameters:
@@ -1900,9 +1900,9 @@ void sched_note_filter_irq(FAR struct note_filter_irq_s *oldf,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
-                           FAR struct note_filter_tag_s *newf)
+#  ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+void sched_note_filter_dump(FAR struct note_filter_tag_s *oldf,
+                            FAR struct note_filter_tag_s *newf)
 {
   irqstate_t falgs;
 
@@ -1924,7 +1924,7 @@ void sched_note_filter_tag(FAR struct note_filter_tag_s *oldf,
 
   spin_unlock_irqrestore_wo_note(&g_note_lock, falgs);
 }
-#endif
+#  endif
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION_FILTER */
 
