@@ -291,8 +291,9 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   /* The first line is the headers */
 
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                              "%13s%11s%11s%11s%11s%7s%7s\n", "", "total",
-                              "used", "free", "largest", "nused", "nfree");
+                              "%13s%11s%11s%11s%11s%11s%7s%7s\n", "",
+                              "total", "used", "free", "largest",
+                              "maxused", "nused", "nfree");
 
   copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                             &offset);
@@ -315,12 +316,13 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
           minfo      = mm_mallinfo(entry->heap);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                                       "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
-                                       entry->name,
+                                       "%12s:%11lu%11lu%11lu%11lu%11lu%7lu"
+                                       "%7lu\n", entry->name,
                                        (unsigned long)minfo.arena,
                                        (unsigned long)minfo.uordblks,
                                        (unsigned long)minfo.fordblks,
                                        (unsigned long)minfo.mxordblk,
+                                       (unsigned long)minfo.usmblks,
                                        (unsigned long)minfo.aordblks,
                                        (unsigned long)minfo.ordblks);
           copysize   = procfs_memcpy(procfile->line, linesize, buffer,

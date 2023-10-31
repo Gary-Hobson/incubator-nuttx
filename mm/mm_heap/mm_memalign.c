@@ -259,6 +259,14 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       mm_shrinkchunk(heap, node, size);
     }
 
+  /* Update heap statistics */
+
+  heap->mm_currused += MM_SIZEOF_NODE(node);
+  if (heap->mm_currused > heap->mm_maxused)
+    {
+      heap->mm_maxused = heap->mm_currused;
+    }
+
   mm_unlock(heap);
 
   MM_ADD_BACKTRACE(heap, node);
