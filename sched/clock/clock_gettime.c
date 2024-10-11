@@ -136,11 +136,11 @@ void nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
         {
           if (clock_type == CLOCK_PROCESS_CPUTIME_ID)
             {
-              up_perf_convert(clock_process_runtime(tcb), tp);
+              perf_convert(clock_process_runtime(tcb), tp);
             }
           else if (clock_type == CLOCK_THREAD_CPUTIME_ID)
             {
-              up_perf_convert(tcb->run_time, tp);
+              perf_convert(tcb->run_time, tp);
             }
         }
 #endif
